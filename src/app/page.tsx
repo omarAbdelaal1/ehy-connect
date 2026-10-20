@@ -110,7 +110,7 @@ export default function HomePage() {
           </button>
 
           <a
-            href="/showcase.html"
+            href="/showcase"
             target="_blank"
             rel="noopener noreferrer"
             className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs border border-indigo-500 transition-colors flex items-center gap-1.5 shadow-xs"
