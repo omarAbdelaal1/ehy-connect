@@ -174,7 +174,7 @@ export const AutomationBuilder: React.FC = memo(() => {
           <div className="border-b border-neutral-100 dark:border-neutral-800 pb-3">
             <h3 className="font-bold text-sm text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
               <span>🧪</span>
-              <span>محاكي اختبار تدفقات الأتمتة المباشر (Rule Sandbox)</span>
+              <span>محاكي التحقق من قواعد وتدفقات الأتمتة (Rule Execution Simulator)</span>
             </h3>
             <p className="text-xs text-neutral-400 mt-0.5">
               اختبر ردود الفعل التلقائية والذكاء الاصطناعي على رسائل تجريبية

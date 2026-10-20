@@ -6,7 +6,7 @@
 // Specialists: UI Designer & Senior Developer
 // ==============================================================================
 
-import React, { useState, memo } from 'react';
+import React, { useState, useRef, memo } from 'react';
 import { ChannelPlatform, SocialPost, UserProfile } from '@/types';
 
 interface PostComposerProps {
@@ -19,7 +19,13 @@ export const PostComposer: React.FC<PostComposerProps> = memo(({
   onSubmitPost,
 }) => {
   const [content, setContent] = useState('');
-  const [mediaUrl, setMediaUrl] = useState('https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800');
+  const [mediaUrl, setMediaUrl] = useState<string | null>('https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800');
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+  const [mediaName, setMediaName] = useState<string>('brand-campaign-hero.jpg');
+  const [mediaSize, setMediaSize] = useState<string>('1.4 MB');
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [selectedPlatforms, setSelectedPlatforms] = useState<ChannelPlatform[]>([
     'instagram',
     'facebook',
@@ -48,6 +54,53 @@ export const PostComposer: React.FC<PostComposerProps> = memo(({
       case 'youtube': return 5000;
       default: return 1000;
     }
+  };
+
+  const processSelectedFile = (file: File) => {
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+    if (!isVideo && !isImage) {
+      alert('يرجى اختيار ملف صورة أو فيديو مدعوم (JPG, PNG, WEBP, MP4)');
+      return;
+    }
+    const localUrl = URL.createObjectURL(file);
+    setMediaUrl(localUrl);
+    setMediaType(isVideo ? 'video' : 'image');
+    setMediaName(file.name);
+    setMediaSize((file.size / (1024 * 1024)).toFixed(2) + ' MB');
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processSelectedFile(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processSelectedFile(file);
+    }
+  };
+
+  const handleRemoveMedia = () => {
+    setMediaUrl(null);
+    setMediaName('');
+    setMediaSize('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSubmit = (action: 'publish_now' | 'schedule' | 'submit_approval') => {
@@ -82,7 +135,7 @@ export const PostComposer: React.FC<PostComposerProps> = memo(({
         <div className="border-b border-neutral-200 dark:border-neutral-800 pb-4">
           <h2 className="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
             <span>📝</span>
-            <span>محرر المنشورات متعدد المنصات (Hootsuite Studio)</span>
+            <span>محرر المنشورات وجدولة المحتوى الرقمي</span>
           </h2>
           <p className="text-xs text-neutral-500 mt-1">
             صمم منشورك مرة واحدة وقم بنشره أو جدولته متزامناً عبر مختلف الشبكات الاجتماعية الرسمية
@@ -144,24 +197,85 @@ export const PostComposer: React.FC<PostComposerProps> = memo(({
 
         {/* 3. Media Asset Uploader */}
         <div className="space-y-2">
-          <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
-            رابط الوسائط (صورة أو فيديو من الاستوديو):
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={mediaUrl}
-              onChange={(e) => setMediaUrl(e.target.value)}
-              placeholder="https://example.com/asset.jpg"
-              className="flex-1 text-xs px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-none"
-            />
-            <button
-              type="button"
-              className="px-3 py-2 text-xs font-semibold rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300"
-            >
-              🖼️ مكتبة الوسائط
-            </button>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+              رفع وتضمين الأصول الرقمية (Asset Upload):
+            </label>
+            <span className="text-[11px] text-neutral-400">يدعم الصور عالية الدقة ومقاطع الفيديو</span>
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,video/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
+          {!mediaUrl ? (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors ${
+                isDragging
+                  ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20'
+                  : 'border-neutral-300 dark:border-neutral-700 hover:border-indigo-400 dark:hover:border-indigo-600 bg-neutral-50/50 dark:bg-neutral-800/40'
+              }`}
+            >
+              <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-2 text-base">
+                📤
+              </div>
+              <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                انقر لرفع صورة أو فيديو من جهازك، أو اسحب الملف وأفلته هنا
+              </p>
+              <p className="text-[11px] text-neutral-400 mt-1">
+                PNG, JPG, WEBP, GIF, MP4 (معاينة فورية في شاشة العرض)
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/60">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="w-12 h-12 rounded-lg bg-neutral-200 dark:bg-neutral-700 overflow-hidden flex items-center justify-center shrink-0">
+                  {mediaType === 'video' ? (
+                    <video src={mediaUrl} className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={mediaUrl} alt="uploaded asset" className="w-full h-full object-cover" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                    {mediaName || 'تم تجهيز الملف بنجاح'}
+                  </p>
+                  <div className="flex items-center gap-2 text-[10px] text-neutral-400 mt-0.5">
+                    <span className="uppercase font-mono bg-neutral-200 dark:bg-neutral-700 px-1 rounded text-[9px]">
+                      {mediaType}
+                    </span>
+                    <span>{mediaSize || 'جاهز للعرض'}</span>
+                    <span className="text-emerald-500 font-semibold">✓ تم التجهيز</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-2.5 py-1 text-xs rounded-lg bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-200 font-medium transition-colors"
+                >
+                  استبدال
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRemoveMedia}
+                  className="px-2.5 py-1 text-xs rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 font-medium transition-colors"
+                >
+                  إزالة
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 4. Scheduling Options */}
@@ -263,10 +377,14 @@ export const PostComposer: React.FC<PostComposerProps> = memo(({
                 <span className="text-neutral-400">•••</span>
               </div>
 
-              {/* Media image */}
+              {/* Media image or video */}
               <div className="w-full h-48 bg-neutral-100 dark:bg-neutral-800 rounded-xl overflow-hidden flex items-center justify-center">
                 {mediaUrl ? (
-                  <img src={mediaUrl} alt="preview" className="w-full h-full object-cover" />
+                  mediaType === 'video' ? (
+                    <video src={mediaUrl} controls autoPlay muted loop className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={mediaUrl} alt="preview" className="w-full h-full object-cover" />
+                  )
                 ) : (
                   <span className="text-neutral-400">لا توجد وسائط</span>
                 )}
@@ -310,8 +428,12 @@ export const PostComposer: React.FC<PostComposerProps> = memo(({
               </p>
 
               {mediaUrl && (
-                <div className="w-full h-40 rounded-lg overflow-hidden bg-neutral-100">
-                  <img src={mediaUrl} alt="fb-preview" className="w-full h-full object-cover" />
+                <div className="w-full h-40 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+                  {mediaType === 'video' ? (
+                    <video src={mediaUrl} controls autoPlay muted loop className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={mediaUrl} alt="fb-preview" className="w-full h-full object-cover" />
+                  )}
                 </div>
               )}
 
@@ -326,7 +448,11 @@ export const PostComposer: React.FC<PostComposerProps> = memo(({
           {activePreviewTab === 'tiktok' && (
             <div className="relative h-80 rounded-2xl overflow-hidden bg-neutral-950 text-white p-3 flex flex-col justify-between">
               {mediaUrl ? (
-                <img src={mediaUrl} alt="tt-preview" className="absolute inset-0 w-full h-full object-cover opacity-70" />
+                mediaType === 'video' ? (
+                  <video src={mediaUrl} controls autoPlay muted loop className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                ) : (
+                  <img src={mediaUrl} alt="tt-preview" className="absolute inset-0 w-full h-full object-cover opacity-70" />
+                )
               ) : null}
 
               <div className="relative z-10 flex justify-between text-xs font-bold">

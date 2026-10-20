@@ -28,7 +28,7 @@ export const UnifiedInbox: React.FC<UnifiedInboxProps> = ({
   const [currentUser, setCurrentUser] = useState<UserProfile>(
     initialUser || {
       id: '33333333-3333-3333-3333-333333333333',
-      organization_id: 'org_demo',
+      organization_id: 'org_enterprise_sa',
       email: 'ahmed.agent@ehyconnect.com',
       full_name: 'أحمد زكي (Ahmed Zaki)',
       role: 'agent',
@@ -36,6 +36,10 @@ export const UnifiedInbox: React.FC<UnifiedInboxProps> = ({
       is_active: true,
     }
   );
+
+  useEffect(() => {
+    if (initialUser) setCurrentUser(initialUser);
+  }, [initialUser]);
 
   const [availableAgents] = useState<UserProfile[]>(
     initialAgents || [
@@ -356,39 +360,11 @@ export const UnifiedInbox: React.FC<UnifiedInboxProps> = ({
   });
 
   return (
-    <div className="flex flex-col h-full bg-neutral-100 dark:bg-neutral-950 font-sans">
-      {/* Test Bar: Role Switcher for Client Demo Testing */}
-      <div className="bg-indigo-900 text-white px-6 py-2 flex items-center justify-between text-xs shadow-md">
-        <div className="flex items-center gap-2">
-          <span className="font-bold tracking-wide">EHY Connect Sandbox</span>
-          <span className="bg-indigo-700 px-2 py-0.5 rounded text-[10px] font-mono">MindBehind Contact Center</span>
-        </div>
-
-        {/* Role Switcher */}
-        <div className="flex items-center gap-2">
-          <span className="text-indigo-200">تبديل دور الموظف الحالي للتجربة:</span>
-          <select
-            value={currentUser.id}
-            onChange={(e) => {
-              const selected = availableAgents.find((a) => a.id === e.target.value);
-              if (selected) setCurrentUser(selected);
-            }}
-            className="bg-indigo-800 border border-indigo-600 rounded px-2 py-1 text-xs text-white focus:outline-none"
-          >
-            {availableAgents.map((agent) => (
-              <option key={agent.id} value={agent.id}>
-                {agent.full_name} ({agent.role.toUpperCase()})
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
+    <div className="flex-1 flex overflow-hidden w-full h-full bg-neutral-100 dark:bg-neutral-950 font-sans">
       {/* Main 3-Pane Contact Center Body */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Pane 1: Conversations List */}
-        <ConversationList
-          conversations={filteredConversations}
+      {/* Pane 1: Conversations List */}
+      <ConversationList
+        conversations={filteredConversations}
           selectedId={selectedId}
           onSelect={handleSelectConversation}
           currentUserId={currentUser.id}
@@ -428,6 +404,5 @@ export const UnifiedInbox: React.FC<UnifiedInboxProps> = ({
           <CustomerSidebar conversation={selectedConversation} />
         )}
       </div>
-    </div>
-  );
-};
+    );
+  };

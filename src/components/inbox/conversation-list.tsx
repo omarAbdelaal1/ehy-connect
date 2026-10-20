@@ -67,7 +67,10 @@ export const ConversationList: React.FC<ConversationListProps> = memo(({
               {conversations.length}
             </span>
           </h2>
-          <span className="text-xs text-neutral-500 font-medium">MindBehind Hub</span>
+          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>متصل مباشرة</span>
+          </span>
         </div>
 
         {/* Search input */}

@@ -32,7 +32,20 @@ export const ChatPane: React.FC<ChatPaneProps> = memo(({
   const [inputText, setInputText] = useState('');
   const [isInternalNote, setIsInternalNote] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<{ name: string; url: string; size: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAttachFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAttachedFile({
+        name: file.name,
+        url: URL.createObjectURL(file),
+        size: (file.size / 1024).toFixed(1) + ' KB',
+      });
+    }
+  };
 
   const activeLock = conversation.active_lock;
   const isLockedByOther = LockManager.isLockedByOther(activeLock, currentUser.id);
@@ -46,9 +59,14 @@ export const ChatPane: React.FC<ChatPaneProps> = memo(({
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim() || isLockedByOther) return;
-    onSendMessage(inputText.trim(), isInternalNote);
+    if ((!inputText.trim() && !attachedFile) || isLockedByOther) return;
+    const finalContent = attachedFile
+      ? `${inputText.trim()}${inputText.trim() ? ' ' : ''}[مرفق: ${attachedFile.name}]`
+      : inputText.trim();
+    onSendMessage(finalContent, isInternalNote);
     setInputText('');
+    setAttachedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleApplyAiSuggestion = () => {
@@ -271,18 +289,49 @@ export const ChatPane: React.FC<ChatPaneProps> = memo(({
             }`}
           />
 
+          {/* Hidden File Input for message attachments */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleAttachFile}
+            className="hidden"
+          />
+
+          {attachedFile && (
+            <div className="flex items-center gap-2 mt-2 p-1.5 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 text-xs text-indigo-700 dark:text-indigo-300 w-fit">
+              <span>📎</span>
+              <span className="font-semibold truncate max-w-xs">{attachedFile.name}</span>
+              <span className="text-[10px] opacity-75">({attachedFile.size})</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setAttachedFile(null);
+                  if (fileInputRef.current) fileInputRef.current.value = '';
+                }}
+                className="text-indigo-500 hover:text-indigo-800 font-bold ml-1"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-2 text-xs text-neutral-500">
-              <span className="cursor-pointer hover:text-neutral-800 dark:hover:text-neutral-200">📎 إرفاق ملف</span>
+              <span
+                onClick={() => fileInputRef.current?.click()}
+                className="cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors"
+              >
+                📎 إرفاق ملف أو مستند
+              </span>
               <span>•</span>
               <span className="cursor-pointer hover:text-neutral-800 dark:hover:text-neutral-200">⚡ ردود سريعة</span>
             </div>
 
             <button
               type="submit"
-              disabled={isLockedByOther || !inputText.trim()}
+              disabled={isLockedByOther || (!inputText.trim() && !attachedFile)}
               className={`px-5 py-2 rounded-xl text-xs font-bold text-white shadow-sm transition-all flex items-center gap-1.5 ${
-                isLockedByOther || !inputText.trim()
+                isLockedByOther || (!inputText.trim() && !attachedFile)
                   ? 'bg-neutral-300 dark:bg-neutral-700 cursor-not-allowed'
                   : isInternalNote
                   ? 'bg-amber-600 hover:bg-amber-700'

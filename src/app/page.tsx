@@ -61,37 +61,38 @@ export default function HomePage() {
 
   return (
     <div className={`min-h-screen flex flex-col ${isEnglish ? 'font-sans' : 'font-sans'}`}>
-      {/* 1. Global Navigation & Sandbox Bar */}
-      <header className="bg-indigo-950 text-white px-4 lg:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-md z-40 sticky top-0">
+      {/* 1. Global Navigation & Workspace Header */}
+      <header className="bg-slate-950 text-white px-4 lg:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-md z-40 sticky top-0 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-sm shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-sm shadow-xs tracking-wider">
             EHY
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm tracking-wide">EHY Connect</span>
-              <span className="bg-indigo-800/80 text-indigo-200 border border-indigo-700/60 px-2 py-0.5 rounded text-[10px] font-mono">
-                MindBehind + Hootsuite Platform
+              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-medium flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>{isEnglish ? 'Enterprise Ready' : 'نظام تشغيل موحد'}</span>
               </span>
             </div>
-            <p className="text-[11px] text-indigo-300 hidden sm:block">
+            <p className="text-[11px] text-slate-400 hidden sm:block">
               {isEnglish
-                ? 'Unified Omnichannel Contact Center & Official Social Media Studio'
-                : 'المنصة الموحدة لإدارة مراكز الاتصال ووسائل التواصل الاجتماعي الرسمية'}
+                ? 'Unified Omnichannel Contact Center & Official Social Media Ecosystem'
+                : 'المنظومة الموحدة لخدمة العملاء وإدارة المحتوى الرقمي المعتمد'}
             </p>
           </div>
         </div>
 
-        {/* Sandbox Role Switcher & Controls */}
+        {/* Workspace Role Switcher & Controls */}
         <div className="flex items-center flex-wrap gap-2 text-xs">
-          <div className="flex items-center gap-1.5 bg-indigo-900/80 px-2.5 py-1 rounded-lg border border-indigo-700/60">
-            <span className="text-indigo-300 font-medium">
-              {isEnglish ? 'Active Role:' : 'الدور التجريبي:'}
+          <div className="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+            <span className="text-slate-400 font-medium">
+              {isEnglish ? 'Active Profile:' : 'الملف الوظيفي النشط:'}
             </span>
             <select
               value={currentUser.id}
               onChange={handleRoleChange}
-              className="bg-indigo-950 text-white font-bold text-xs rounded border border-indigo-700 px-2 py-0.5 focus:outline-none"
+              className="bg-slate-950 text-white font-bold text-xs rounded border border-slate-700 px-2 py-0.5 focus:outline-none"
             >
               {availableRoles.map((r) => (
                 <option key={r.id} value={r.id}>
@@ -103,7 +104,7 @@ export default function HomePage() {
 
           <button
             onClick={toggleLanguage}
-            className="px-2.5 py-1 rounded-lg bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-700/60 font-bold text-xs transition-colors"
+            className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 font-bold text-xs text-slate-200 transition-colors"
           >
             {isEnglish ? 'العربية 🌐' : 'English 🌐'}
           </button>
@@ -112,10 +113,10 @@ export default function HomePage() {
             href="/showcase.html"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-1 rounded-lg bg-indigo-800 hover:bg-indigo-700 text-indigo-100 font-bold text-xs border border-indigo-600 transition-colors flex items-center gap-1"
+            className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs border border-indigo-500 transition-colors flex items-center gap-1.5 shadow-xs"
           >
             <span>📱</span>
-            <span>{isEnglish ? 'Standalone Showcase' : 'الشاشة التجريبية المستقلة'}</span>
+            <span>{isEnglish ? 'Interactive Live View' : 'استعراض الواجهة التفاعلية'}</span>
           </a>
         </div>
       </header>
@@ -131,19 +132,19 @@ export default function HomePage() {
           }`}
         >
           <span>📥</span>
-          <span>{isEnglish ? 'Contact Center (MindBehind)' : 'مركز المحادثات (MindBehind)'}</span>
+          <span>{isEnglish ? 'Contact Center & Unified Inbox' : 'مركز خدمة العملاء والمحادثات'}</span>
         </button>
 
         <button
           onClick={() => setActiveTab('studio')}
           className={`py-3 px-2 border-b-2 flex items-center gap-2 whitespace-nowrap transition-all ${
             activeTab === 'studio'
-              ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+              ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
               : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
           }`}
         >
           <span>📝</span>
-          <span>{isEnglish ? 'Social Studio (Hootsuite)' : 'استوديو المنشورات (Hootsuite)'}</span>
+          <span>{isEnglish ? 'Social Publishing Studio' : 'استوديو النشر وإدارة المحتوى'}</span>
         </button>
 
         <button
@@ -155,7 +156,7 @@ export default function HomePage() {
           }`}
         >
           <span>📊</span>
-          <span>{isEnglish ? 'Supervisor & SLA' : 'لوحة المشرف ومراقبة SLA'}</span>
+          <span>{isEnglish ? 'Supervisor SLA & Analytics' : 'لوحة إشراف الأداء ومراقبة SLA'}</span>
         </button>
 
         <button
@@ -167,7 +168,7 @@ export default function HomePage() {
           }`}
         >
           <span>⚡</span>
-          <span>{isEnglish ? 'Automation & AI' : 'مركز الأتمتة والذكاء الاصطناعي'}</span>
+          <span>{isEnglish ? 'Automations & AI Workflows' : 'مركز الأتمتة والذكاء الاصطناعي'}</span>
         </button>
       </nav>
 

@@ -6,7 +6,7 @@
 // Specialists: UI Designer & Senior Developer
 // ==============================================================================
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SocialPost, UserProfile } from '@/types';
 import { PostComposer } from './post-composer';
 import { ContentCalendar } from './content-calendar';
@@ -23,7 +23,7 @@ export const SocialStudio: React.FC<SocialStudioProps> = ({
   const [currentUser, setCurrentUser] = useState<UserProfile>(
     initialUser || {
       id: '44444444-4444-4444-4444-444444444444',
-      organization_id: 'org_demo',
+      organization_id: 'org_enterprise_sa',
       email: 'nour.smm@ehyconnect.com',
       full_name: 'نور الصباح (Nour Al-Sabah)',
       role: 'social_manager',
@@ -31,6 +31,10 @@ export const SocialStudio: React.FC<SocialStudioProps> = ({
       is_active: true,
     }
   );
+
+  useEffect(() => {
+    if (initialUser) setCurrentUser(initialUser);
+  }, [initialUser]);
 
   const [activeTab, setActiveTab] = useState<'composer' | 'calendar' | 'moderation' | 'approvals'>('composer');
 
@@ -114,43 +118,6 @@ export const SocialStudio: React.FC<SocialStudioProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-neutral-100 dark:bg-neutral-950 font-sans">
-      {/* Test Sandbox Top Bar */}
-      <div className="bg-purple-950 text-white px-6 py-2 flex items-center justify-between text-xs shadow-md">
-        <div className="flex items-center gap-2">
-          <span className="font-bold tracking-wide">EHY Connect Sandbox</span>
-          <span className="bg-purple-800 px-2 py-0.5 rounded text-[10px] font-mono">Hootsuite Social Studio</span>
-        </div>
-
-        {/* Role Switcher */}
-        <div className="flex items-center gap-2">
-          <span className="text-purple-200">تبديل دور المستخدم للتجربة:</span>
-          <select
-            value={currentUser.role}
-            onChange={(e) => {
-              const role = e.target.value as any;
-              setCurrentUser((prev) => ({
-                ...prev,
-                role,
-                full_name:
-                  role === 'admin'
-                    ? 'خالد المنصور (Admin)'
-                    : role === 'supervisor'
-                    ? 'ليلى حسن (Supervisor)'
-                    : role === 'social_manager'
-                    ? 'نور الصباح (SMM)'
-                    : 'أحمد زكي (Agent)',
-              }));
-            }}
-            className="bg-purple-900 border border-purple-700 rounded px-2 py-1 text-xs text-white focus:outline-none"
-          >
-            <option value="social_manager">نور الصباح (Social Media Manager)</option>
-            <option value="supervisor">ليلى حسن (Supervisor)</option>
-            <option value="admin">خالد المنصور (Admin)</option>
-            <option value="agent">أحمد زكي (Agent)</option>
-          </select>
-        </div>
-      </div>
-
       {/* Social Studio Navigation Tabs */}
       <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 px-6 flex items-center gap-6 text-xs font-bold">
         {[
