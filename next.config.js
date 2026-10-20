@@ -9,8 +9,15 @@ const nextConfig = {
       'lookaside.fbsbx.com',
     ],
   },
-  experimental: {
-    serverActions: true,
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/',
+          destination: '/showcase.html',
+        },
+      ],
+    };
   },
 };
 
