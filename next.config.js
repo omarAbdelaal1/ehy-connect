@@ -9,14 +9,6 @@ const nextConfig = {
       'lookaside.fbsbx.com',
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/',
-        destination: '/showcase',
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;
