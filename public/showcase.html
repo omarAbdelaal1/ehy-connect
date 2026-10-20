@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EHY Connect — Omnichannel Contact Center & Social Media Management Platform</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Cairo (Arabic) & Inter (English) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Cairo', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbars & RTL Micro-polish */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.7); }
+    .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+    .dark .glass-card { background: rgba(23, 23, 23, 0.85); }
+    [dir="ltr"] { font-family: 'Inter', system-ui, sans-serif; }
+  </style>
+</head>
+<body class="bg-neutral-100 dark:bg-neutral-950 text-neutral-800 dark:text-neutral-100 min-h-screen flex flex-col font-sans select-none">
+
+  <!-- ============================================================================== -->
+  <!-- 1. TOP SANDBOX CONTROL HEADER (Role Switcher & Live Simulation Controls)       -->
+  <!-- ============================================================================== -->
+  <header class="bg-indigo-950 text-white px-4 lg:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-md z-40 sticky top-0">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-sm shadow-sm">
+        EHY
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-sm tracking-wide" id="brand-title">EHY Connect</span>
+          <span class="bg-indigo-800/80 text-indigo-200 border border-indigo-700/60 px-2 py-0.5 rounded text-[10px] font-mono">
+            MindBehind + Hootsuite Platform
+          </span>
+        </div>
+        <p class="text-[11px] text-indigo-300 hidden sm:block" id="brand-sub">
+          المنصة الموحدة لإدارة مراكز الاتصال ووسائل التواصل الاجتماعي الرسمية
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Controls: Role Switcher, Language Toggle, and Inbound Webhook Simulator -->
+    <div class="flex items-center flex-wrap gap-2 text-xs">
+      <!-- Role Switcher -->
+      <div class="flex items-center gap-1.5 bg-indigo-900/80 px-2.5 py-1 rounded-lg border border-indigo-700/60">
+        <span class="text-indigo-300 font-medium" id="lbl-role">الدور:</span>
+        <select id="role-select" onchange="switchRole(this.value)" class="bg-indigo-950 text-white font-bold text-xs rounded border border-indigo-700 px-2 py-0.5 focus:outline-none">
+          <option value="agent">أحمد زكي — Agent (موظف خدمة عملاء)</option>
+          <option value="supervisor">ليلى حسن — Supervisor (مشرف الفترة)</option>
+          <option value="social_manager">نور الصباح — Social Media Manager (مسؤول محتوى)</option>
+          <option value="admin">خالد المنصور — Administrator (المدير التنفيذي)</option>
+        </select>
+      </div>
+
+      <!-- Language Switcher -->
+      <button onclick="toggleLanguage()" class="px-2.5 py-1 rounded-lg bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-700/60 font-bold text-xs transition-colors" id="btn-lang">
+        English 🌐
+      </button>
+
+      <!-- Inbound WhatsApp Webhook Simulator Button -->
+      <button onclick="simulateIncomingWhatsApp()" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm animate-pulse">
+        <span>📲</span>
+        <span id="btn-simulate">محاكاة رسالة واتساب واردة (Webhook)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================================================== -->
+  <!-- 2. PRIMARY NAVIGATION TABS BAR                                                -->
+  <!-- ============================================================================== -->
+  <nav class="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 px-4 lg:px-6 flex items-center gap-1 lg:gap-6 overflow-x-auto text-xs font-bold shadow-xs z-30">
+    <button onclick="setActiveTab('inbox')" id="tab-inbox" class="py-3 px-2 border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 flex items-center gap-2 whitespace-nowrap transition-all">
+      <span>📥</span>
+      <span class="tab-title" data-ar="مركز المحادثات (MindBehind)" data-en="Contact Center (MindBehind)">مركز المحادثات (MindBehind)</span>
+      <span class="bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded-full text-[10px] font-mono" id="inbox-badge-count">3</span>
+    </button>
+
+    <button onclick="setActiveTab('studio')" id="tab-studio" class="py-3 px-2 border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white flex items-center gap-2 whitespace-nowrap transition-all">
+      <span>📝</span>
+      <span class="tab-title" data-ar="استوديو المنشورات (Hootsuite)" data-en="Social Studio (Hootsuite)">استوديو المنشورات (Hootsuite)</span>
+    </button>
+
+    <button onclick="setActiveTab('calendar')" id="tab-calendar" class="py-3 px-2 border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white flex items-center gap-2 whitespace-nowrap transition-all">
+      <span>📅</span>
+      <span class="tab-title" data-ar="تقويم المحتوى والجدولة" data-en="Content Calendar">تقويم المحتوى والجدولة</span>
+    </button>
+
+    <button onclick="setActiveTab('moderation')" id="tab-moderation" class="py-3 px-2 border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white flex items-center gap-2 whitespace-nowrap transition-all">
+      <span>💬</span>
+      <span class="tab-title" data-ar="إدارة التعليقات والتفاعل" data-en="Comment Moderation">إدارة التعليقات والتفاعل</span>
+    </button>
+
+    <button onclick="setActiveTab('approvals')" id="tab-approvals" class="py-3 px-2 border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white flex items-center gap-2 whitespace-nowrap transition-all">
+      <span>⚖️</span>
+      <span class="tab-title" data-ar="طابور الموافقات التحريرية" data-en="Approval Queue">طابور الموافقات التحريرية</span>
+      <span class="bg-amber-500 text-white px-1.5 py-0.5 rounded-full text-[10px] font-mono" id="approvals-badge">1</span>
+    </button>
+
+    <button onclick="setActiveTab('automation')" id="tab-automation" class="py-3 px-2 border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white flex items-center gap-2 whitespace-nowrap transition-all">
+      <span>⚡</span>
+      <span class="tab-title" data-ar="مركز الأتمتة وفرز الذكاء الاصطناعي" data-en="Automation & AI">مركز الأتمتة وفرز الذكاء الاصطناعي</span>
+    </button>
+
+    <button onclick="setActiveTab('supervisor')" id="tab-supervisor" class="py-3 px-2 border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white flex items-center gap-2 whitespace-nowrap transition-all">
+      <span>📊</span>
+      <span class="tab-title" data-ar="لوحة المشرف ومراقبة SLA" data-en="Supervisor & SLA">لوحة المشرف ومراقبة SLA</span>
+    </button>
+  </nav>
+
+  <!-- ============================================================================== -->
+  <!-- 3. MAIN WORKSPACE CONTAINER (DYNAMIC SECTIONS)                                 -->
+  <!-- ============================================================================== -->
+  <main class="flex-1 flex overflow-hidden relative">
+
+    <!-- ========================================================================== -->
+    <!-- SECTION 1: OMNICHANNEL CONTACT CENTER (MIND BEHIND INBOX)                  -->
+    <!-- ========================================================================== -->
+    <div id="section-inbox" class="flex-1 flex overflow-hidden">
+      <!-- 1.1 Left Filter & Conversation List -->
+      <div class="w-80 lg:w-96 border-l border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex flex-col h-full flex-shrink-0">
+        <div class="p-3.5 border-b border-neutral-200 dark:border-neutral-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-sm text-neutral-900 dark:text-white flex items-center gap-2">
+              <span class="lang-txt" data-ar="صندوق الرسائل الواردة" data-en="Omnichannel Inbox">صندوق الرسائل الواردة</span>
+              <span class="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-bold" id="conv-count-badge">3</span>
+            </h3>
+            <span class="text-[11px] text-neutral-400">Meta + WhatsApp</span>
+          </div>
+
+          <!-- Channel Filter Pills -->
+          <div class="flex gap-1 overflow-x-auto text-[11px] pb-1 scrollbar-none">
+            <button onclick="filterConversations('all')" class="px-2.5 py-1 rounded-md font-bold bg-indigo-600 text-white whitespace-nowrap conv-filter-btn" data-filter="all">الكل (All)</button>
+            <button onclick="filterConversations('whatsapp')" class="px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 whitespace-nowrap conv-filter-btn" data-filter="whatsapp">💬 واتساب</button>
+            <button onclick="filterConversations('instagram')" class="px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 whitespace-nowrap conv-filter-btn" data-filter="instagram">📸 إنستغرام</button>
+            <button onclick="filterConversations('facebook')" class="px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 whitespace-nowrap conv-filter-btn" data-filter="facebook">👤 فيسبوك</button>
+          </div>
+        </div>
+
+        <!-- Conversation Item List -->
+        <div class="flex-1 overflow-y-auto divide-y divide-neutral-100 dark:divide-neutral-800/60" id="conversation-list-container">
+          <!-- Dynamically Injected -->
+        </div>
+      </div>
+
+      <!-- 1.2 Center Active Conversation Pane & Collision Lockout -->
+      <div class="flex-1 flex flex-col h-full bg-neutral-50/70 dark:bg-neutral-950/40 relative">
+        <!-- Conversation Header -->
+        <div class="p-3.5 px-6 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex items-center justify-between shadow-xs z-10" id="chat-header">
+          <!-- Dynamically Injected -->
+        </div>
+
+        <!-- Deterministic Collision Lock Banner -->
+        <div id="collision-banner" class="hidden">
+          <!-- Injected via JavaScript based on active lock state -->
+        </div>
+
+        <!-- Messages Stream -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-4" id="messages-container">
+          <!-- Dynamically Injected -->
+        </div>
+
+        <!-- Composer & AI Reply Assistant -->
+        <div class="p-4 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 space-y-2">
+          <!-- Composer Mode Tabs & AI Trigger -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800 p-0.5 rounded-lg text-xs">
+              <button onclick="setComposerMode(false)" id="btn-mode-reply" class="px-3 py-1 rounded-md font-bold bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-xs">
+                رد رسمي للعميل (Reply)
+              </button>
+              <button onclick="setComposerMode(true)" id="btn-mode-note" class="px-3 py-1 rounded-md font-bold text-neutral-500 hover:text-neutral-900 dark:hover:text-white">
+                ملاحظة داخلية (Internal Note)
+              </button>
+            </div>
+
+            <!-- Smart AI Response Button -->
+            <button onclick="triggerSmartAiReply()" id="btn-ai-assist" class="px-3 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold flex items-center gap-1.5 hover:bg-purple-100 transition-colors">
+              <span>✨</span>
+              <span class="lang-txt" data-ar="اقتراح ذكاء اصطناعي (AI Reply)" data-en="AI Suggested Reply">اقتراح ذكاء اصطناعي (AI Reply)</span>
+            </button>
+          </div>
+
+          <!-- Input Field -->
+          <div class="relative">
+            <textarea id="chat-input" rows="3" placeholder="اكتب ردك للعميل هنا... (Enter للإرسال)" class="w-full p-3 text-sm rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/80 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40 resize-none leading-relaxed transition-all"></textarea>
+            
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-2 text-xs text-neutral-400">
+                <span class="cursor-pointer hover:text-neutral-700 dark:hover:text-neutral-200">📎 إرفاق ملف</span>
+                <span>•</span>
+                <span class="cursor-pointer hover:text-neutral-700 dark:hover:text-neutral-200" onclick="insertCannedReply('نحن في خدمتك دائماً!')">⚡ رد سريع</span>
+              </div>
+
+              <button onclick="handleSendMessage()" id="btn-send-message" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5">
+                <span class="lang-txt" data-ar="إرسال الرد" data-en="Send Message">إرسال الرد</span>
+                <span>🚀</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.3 Right Customer Metadata Drawer -->
+      <div class="w-72 lg:w-80 border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 flex flex-col h-full overflow-y-auto space-y-6 flex-shrink-0" id="customer-sidebar">
+        <!-- Dynamically Injected -->
+      </div>
+    </div>
+
+    <!-- ========================================================================== -->
+    <!-- SECTION 2: SOCIAL MEDIA STUDIO (HOOTSUITE PILLAR)                          -->
+    <!-- ========================================================================== -->
+    <div id="section-studio" class="hidden flex-1 flex flex-col lg:flex-row h-full overflow-y-auto p-6 gap-6 bg-neutral-50 dark:bg-neutral-950">
+      <!-- Left: Studio Composer -->
+      <div class="flex-1 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 space-y-5 shadow-xs">
+        <div class="border-b border-neutral-200 dark:border-neutral-800 pb-4">
+          <h2 class="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+            <span>📝</span>
+            <span class="lang-txt" data-ar="محرر المنشورات متعدد المنصات (Unified Composer)" data-en="Multi-Platform Social Composer">محرر المنشورات متعدد المنصات (Unified Composer)</span>
+          </h2>
+          <p class="text-xs text-neutral-500 mt-1">
+            انشر في Instagram وTikTok وFacebook وYouTube بنقرة واحدة عبر Zernio Engine
+          </p>
+        </div>
+
+        <!-- Target Networks -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-neutral-700 dark:text-neutral-300">المنصات المستهدفة:</label>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="toggleStudioPlatform('instagram')" id="btn-plat-instagram" class="px-3 py-2 rounded-xl text-xs font-bold border border-neutral-900 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-xs flex items-center gap-2">
+              <span>📸</span><span>Instagram (Reel/Feed)</span><span>✓</span>
+            </button>
+            <button onclick="toggleStudioPlatform('facebook')" id="btn-plat-facebook" class="px-3 py-2 rounded-xl text-xs font-bold border border-neutral-900 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-xs flex items-center gap-2">
+              <span>👤</span><span>Facebook Pages</span><span>✓</span>
+            </button>
+            <button onclick="toggleStudioPlatform('tiktok')" id="btn-plat-tiktok" class="px-3 py-2 rounded-xl text-xs font-bold border border-neutral-900 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-xs flex items-center gap-2">
+              <span>🎵</span><span>TikTok Shorts</span><span>✓</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Post Content -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <label class="font-bold text-neutral-700 dark:text-neutral-300">محتوى المنشور التسويقي:</label>
+            <span class="font-mono text-neutral-400" id="studio-char-count">104 / 2200 حرف</span>
+          </div>
+          <textarea id="studio-content" rows="4" oninput="updateStudioPreview()" class="w-full p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 resize-none leading-relaxed">كيف تضاعف مبيعات متجرك الإلكتروني عبر واتساب للأعمال في 3 خطوات بسيطة؟ 🚀 شاركونا تجاربكم بالتعليقات!</textarea>
+        </div>
+
+        <!-- Media Asset URL -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-neutral-700 dark:text-neutral-300">رابط صورة أو فيديو من مكتبة الوسائط:</label>
+          <input type="text" id="studio-media-url" oninput="updateStudioPreview()" value="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800" class="w-full text-xs px-3 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-none" />
+        </div>
+
+        <!-- Schedule Date -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-neutral-700 dark:text-neutral-300">تاريخ ووقت الجدولة التلقائية:</label>
+          <input type="datetime-local" id="studio-schedule-date" value="2026-10-25T14:30" class="w-full text-xs px-3 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-none" />
+        </div>
+
+        <!-- Actions -->
+        <div class="pt-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+          <div class="text-xs text-neutral-500" id="studio-role-indicator">
+            الصلاحية: <strong>Social Media Manager</strong>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="submitStudioPost('approval')" id="btn-studio-approval" class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5">
+              <span>إرسال للمشرف للاعتماد (Submit for Approval)</span>
+              <span>📋</span>
+            </button>
+            <button onclick="submitStudioPost('publish')" id="btn-studio-publish" class="hidden px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5">
+              <span>نشر فوري الآن (Direct Publish)</span>
+              <span>🚀</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Live Simulated Mobile Phone Preview -->
+      <div class="w-full lg:w-96 flex flex-col space-y-4">
+        <!-- Preview Device Shell -->
+        <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-4 shadow-lg max-w-sm mx-auto w-full">
+          <div class="w-28 h-4 bg-neutral-200 dark:bg-neutral-800 rounded-full mx-auto mb-3"></div>
+
+          <!-- Instagram Mock -->
+          <div class="space-y-3 text-xs">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-pink-600 p-0.5">
+                  <div class="w-6 h-6 bg-white dark:bg-neutral-900 rounded-full flex items-center justify-center font-bold text-[10px]">E</div>
+                </div>
+                <span class="font-bold">ehy_connect_official</span>
+              </div>
+              <span class="text-neutral-400">•••</span>
+            </div>
+
+            <div class="w-full h-48 bg-neutral-100 dark:bg-neutral-800 rounded-xl overflow-hidden flex items-center justify-center">
+              <img id="preview-img" src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800" alt="preview" class="w-full h-full object-cover">
+            </div>
+
+            <div class="flex justify-between text-base px-1">
+              <div class="flex gap-3"><span>❤️</span><span>💬</span><span>↗️</span></div>
+              <span>🔖</span>
+            </div>
+
+            <p class="text-[11px] leading-relaxed line-clamp-3" id="preview-text">
+              كيف تضاعف مبيعات متجرك الإلكتروني عبر واتساب للأعمال في 3 خطوات بسيطة؟ 🚀 شاركونا تجاربكم بالتعليقات!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================== -->
+    <!-- SECTION 3: CONTENT CALENDAR                                                -->
+    <!-- ========================================================================== -->
+    <div id="section-calendar" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-50 dark:bg-neutral-950">
+      <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-4">
+        <div>
+          <h2 class="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+            <span>📅</span>
+            <span>تقويم وجدولة المنشورات (Content Calendar)</span>
+          </h2>
+          <p class="text-xs text-neutral-500 mt-1">أكتوبر 2026 — استعراض أسبوعي متزامن لكافة الحسابات المتصلة</p>
+        </div>
+      </div>
+
+      <!-- Weekly Grid -->
+      <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden shadow-xs">
+        <div class="grid grid-cols-7 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/40 text-center text-xs font-bold py-3 text-neutral-600 dark:text-neutral-300">
+          <div>الأحد (18)</div><div>الإثنين (19)</div><div class="text-indigo-600 dark:text-indigo-400">الثلاثاء (20 - اليوم)</div><div>الأربعاء (21)</div><div>الخميس (22)</div><div>الجمعة (23)</div><div>السبت (24)</div>
+        </div>
+
+        <div class="grid grid-cols-7 min-h-[360px] divide-x divide-neutral-200 dark:divide-neutral-800 divide-x-reverse text-xs p-2 gap-2" id="calendar-grid">
+          <!-- Tuesday 20: Published -->
+          <div class="col-start-3 p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 space-y-1.5">
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white">منشور (Published)</span>
+            <p class="text-[11px] font-medium line-clamp-2">شاهد كيف يعمل محرك EHY Connect لتوحيد جميع رسائل السوشيال ميديا 🔥</p>
+            <div class="text-[10px] text-neutral-400 font-mono">12:00 م • TikTok & IG</div>
+          </div>
+
+          <!-- Thursday 22: Pending Approval -->
+          <div class="col-start-5 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 space-y-1.5">
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500 text-white">ينتظر الاعتماد</span>
+            <p class="text-[11px] font-medium line-clamp-2">كيف تضاعف مبيعات متجرك الإلكتروني عبر واتساب للأعمال في 3 خطوات بسيطة؟</p>
+            <div class="text-[10px] text-neutral-400 font-mono">10:00 ص • Instagram</div>
+          </div>
+
+          <!-- Saturday 24: Scheduled -->
+          <div class="col-start-7 p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/50 space-y-1.5">
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-600 text-white">مجدول (Scheduled)</span>
+            <p class="text-[11px] font-medium line-clamp-2">إطلاق ميزة الردود المقترحة بالذكاء الاصطناعي في EHY Connect!</p>
+            <div class="text-[10px] text-neutral-400 font-mono">04:00 م • Facebook</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================== -->
+    <!-- SECTION 4: COMMENT MODERATION & TRIAGE                                     -->
+    <!-- ========================================================================== -->
+    <div id="section-moderation" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-50 dark:bg-neutral-950">
+      <div class="border-b border-neutral-200 dark:border-neutral-800 pb-4">
+        <h2 class="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+          <span>💬</span>
+          <span>إدارة وفرز التعليقات على المنشورات (Comment Moderation)</span>
+        </h2>
+        <p class="text-xs text-neutral-500 mt-1">فرز التعليقات، تحليل المشاعر، وتحويل شكاوى العملاء إلى تذاكر في صندوق الوارد</p>
+      </div>
+
+      <div class="space-y-4 max-w-4xl" id="comments-container">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+    <!-- ========================================================================== -->
+    <!-- SECTION 5: APPROVAL QUEUE                                                  -->
+    <!-- ========================================================================== -->
+    <div id="section-approvals" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-50 dark:bg-neutral-950">
+      <div class="border-b border-neutral-200 dark:border-neutral-800 pb-4">
+        <h2 class="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+          <span>⚖️</span>
+          <span>طابور الموافقات والاعتماد التحريري (Editorial Approval Queue)</span>
+        </h2>
+        <p class="text-xs text-neutral-500 mt-1">مراجعة واعتماد منشورات مسؤولي المحتوى قبل نشرها على الحسابات الرسمية</p>
+      </div>
+
+      <div class="space-y-4 max-w-4xl" id="approvals-container">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+    <!-- ========================================================================== -->
+    <!-- SECTION 6: AUTOMATION & AI WORKFLOW BUILDER                                -->
+    <!-- ========================================================================== -->
+    <div id="section-automation" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-50 dark:bg-neutral-950">
+      <div class="border-b border-neutral-200 dark:border-neutral-800 pb-4">
+        <h2 class="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+          <span>⚡</span>
+          <span>مركز الأتمتة والذكاء الاصطناعي (Automation Center)</span>
+        </h2>
+        <p class="text-xs text-neutral-500 mt-1">إدارة قواعد الفرز التلقائي ومحاكاة الاستجابة الذكية لرسائل العملاء</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Rules List -->
+        <div class="lg:col-span-7 space-y-3">
+          <h3 class="font-bold text-sm">قواعد الأتمتة المعتمدة</h3>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm">1. فرز استفسارات الأسعار والمبيعات</span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+            </div>
+            <p class="text-xs text-neutral-500">الكلمات: [سعر, باقة, اشتراك, تكلفة] ➔ تحويل لفريق المبيعات + وسم #مبيعات</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm">2. تصعيد نبرة الغضب والشكاوى للمشرف</span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+            </div>
+            <p class="text-xs text-neutral-500">المشاعر: [سلبية / غضب] ➔ تحويل الأولوية إلى عاجل + تنبيه المشرف</p>
+          </div>
+        </div>
+
+        <!-- Simulator Sandbox -->
+        <div class="lg:col-span-5 bg-white dark:bg-neutral-900 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 p-5 space-y-3">
+          <h3 class="font-bold text-sm text-indigo-600 dark:text-indigo-400">🧪 محاكي فحص النوايا والأتمتة</h3>
+          <textarea id="sim-input" rows="3" class="w-full text-xs p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-none">السلام عليكم، نحتاج معرفة أسعار باقة الشركات لـ 20 موظفاً مع ربط واتساب الرسمي.</textarea>
+          <button onclick="runSimulation()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-colors">
+            تشغيل المحاكاة الفورية ⚡
+          </button>
+
+          <div id="sim-output" class="p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-xs space-y-2 border border-indigo-200 dark:border-indigo-800">
+            <div>النية المكتشفة: <strong class="text-indigo-600">sales_inquiry (دقة 95%)</strong></div>
+            <div>المشاعر: <strong class="text-emerald-600">😊 إيجابي</strong></div>
+            <div>القاعدة المطبقة: <strong>تحويل فوري لفريق المبيعات</strong></div>
+            <div class="pt-2 border-t border-indigo-200 dark:border-indigo-800">
+              <span class="text-purple-600 font-bold">✨ الرد المقترح بالذكاء الاصطناعي:</span>
+              <p class="mt-1 text-neutral-700 dark:text-neutral-300">أهلاً بك! نوفر باقات مرنة للشركات مع دعم كامل لواتساب الرسمي وقفل التضارب. هل تحب تزويدك بملف الأسعار أو جدولة ديمو؟</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================== -->
+    <!-- SECTION 7: SUPERVISOR LIVE OPERATIONS DASHBOARD                            -->
+    <!-- ========================================================================== -->
+    <div id="section-supervisor" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-50 dark:bg-neutral-950">
+      <div class="border-b border-neutral-200 dark:border-neutral-800 pb-4">
+        <h2 class="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+          <span>📊</span>
+          <span>لوحة المشرف ومراقبة العمليات الحية (Supervisor Dashboard)</span>
+        </h2>
+        <p class="text-xs text-neutral-500 mt-1">متابعة زمن الرد الأول (FRT)، توزيع التذاكر على الموظفين، وقفل التضارب</p>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="p-4 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+          <div class="text-xs text-neutral-500">التذاكر المفتوحة</div>
+          <div class="text-2xl font-black mt-1">18 تذكرة</div>
+        </div>
+        <div class="p-4 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+          <div class="text-xs text-neutral-500">متوسط زمن الاستجابة (FRT)</div>
+          <div class="text-2xl font-black text-emerald-600 mt-1">1m 24s</div>
+        </div>
+        <div class="p-4 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+          <div class="text-xs text-neutral-500">المحادثات المقفلة حالياً</div>
+          <div class="text-2xl font-black text-amber-500 mt-1" id="kpi-locks">1 محادثة</div>
+        </div>
+        <div class="p-4 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+          <div class="text-xs text-neutral-500">معدل الرضا (CSAT)</div>
+          <div class="text-2xl font-black text-indigo-600 mt-1">4.85 / 5.0</div>
+        </div>
+      </div>
+
+      <!-- Agents Workload Table -->
+      <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">
+        <h3 class="font-bold text-sm">حالة الموظفين والنشاط الحالي</h3>
+        <table class="w-full text-right text-xs">
+          <thead>
+            <tr class="border-b border-neutral-200 dark:border-neutral-800 text-neutral-400">
+              <th class="pb-2">الموظف</th><th>الدور</th><th>الحالة</th><th>التذاكر النشطة</th><th>القفل النشط</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
+            <tr>
+              <td class="py-2.5 font-bold">أحمد زكي</td><td>Agent</td><td><span class="text-emerald-500 font-bold">متصل</span></td><td>3</td><td>🔒 سارة الغامدي (#102)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 font-bold">ليلى حسن</td><td>Supervisor</td><td><span class="text-emerald-500 font-bold">متصل</span></td><td>1</td><td>—</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 font-bold">نور الصباح</td><td>Social Manager</td><td><span class="text-emerald-500 font-bold">متصل</span></td><td>0</td><td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================================== -->
+  <!-- 4. CORE JAVASCRIPT STATE ENGINE & INTERACTIVE LOGIC                            -->
+  <!-- ============================================================================== -->
+  <script>
+    // --- Application State Model ---
+    const state = {
+      language: 'ar',
+      currentRole: 'agent', // agent | supervisor | social_manager | admin
+      currentUserId: 'agent_ahmed',
+      currentUserName: 'أحمد زكي (Ahmed Zaki)',
+      activeTab: 'inbox',
+      selectedConversationId: 'conv_1',
+      composerModeNote: false,
+      filterPlatform: 'all',
+      conversations: [
+        {
+          id: 'conv_1',
+          customerName: 'عبدالعزيز الشمري',
+          phone: '+966551234567',
+          platform: 'whatsapp',
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+          status: 'open',
+          priority: 'high',
+          sentiment: 'positive',
+          assignedAgent: 'أحمد زكي (Agent)',
+          tags: ['مبيعات', 'عرض_أسعار'],
+          lastMessage: 'السلام عليكم، نحتاج عرض سعر رسمي لباقة 25 موظف ومميزات الأتمتة المتقدمة.',
+          lockedBy: null, // No lock
+          messages: [
+            { id: 'm1', from: 'customer', text: 'مرحباً، اطلعت على منصة EHY Connect ومهتم بالاشتراك لشركتنا في الرياض.' },
+            { id: 'm2', from: 'agent', text: 'أهلاً بك أستاذ عبدالعزيز! باقة الشركات تدعم حتى 50 موظفاً مع ربط واتساب الرسمي وتوزيع التذاكر وقفل التضارب.' },
+            { id: 'm3', from: 'customer', text: 'السلام عليكم، نحتاج عرض سعر رسمي لباقة 25 موظف ومميزات الأتمتة المتقدمة.' },
+          ]
+        },
+        {
+          id: 'conv_2',
+          customerName: 'سارة الغامدي',
+          phone: '@sarah_ksa (Instagram DM)',
+          platform: 'instagram',
+          avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100',
+          status: 'open',
+          priority: 'medium',
+          sentiment: 'neutral',
+          assignedAgent: 'ليلى حسن (Supervisor)',
+          tags: ['إنستغرام', 'دعم_المتجر'],
+          lastMessage: 'هل يمكن ربط رسائل المتجر المباشرة مع فريق المبيعات فوراً؟',
+          // ACTIVELY LOCKED BY SUPERVISOR TO TEST COLLISION LOCKOUT
+          lockedBy: { id: 'sup_layla', name: 'ليلى حسن (Supervisor)', expiresSeconds: 85 },
+          messages: [
+            { id: 'm21', from: 'customer', text: 'مساء الخير، هل يمكن ربط رسائل المتجر المباشرة مع فريق المبيعات فوراً؟' }
+          ]
+        },
+        {
+          id: 'conv_3',
+          customerName: 'محمد باقادر',
+          phone: 'Facebook Page Messenger',
+          platform: 'facebook',
+          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+          status: 'open',
+          priority: 'urgent',
+          sentiment: 'negative',
+          assignedAgent: 'ليلى حسن (Supervisor)',
+          tags: ['شكوى', 'عاجل'],
+          lastMessage: 'أرسلت لكم منذ ساعتين ولم يرد أحد، الإعلانات نشطة وتكلفنا مبالغ كبيرة!',
+          lockedBy: null,
+          messages: [
+            { id: 'm31', from: 'customer', text: 'أرسلت لكم منذ ساعتين ولم يرد أحد، الإعلانات نشطة وتكلفنا مبالغ كبيرة!' },
+            { id: 'm32', from: 'note', text: 'ملاحظة إدارية: تم تصعيد الشكوى لمنع تقييم سلبي في الحملة الإعلانية.' }
+          ]
+        }
+      ],
+      comments: [
+        {
+          id: 'cm_1',
+          author: 'فيصل العتيبي',
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
+          platform: 'instagram',
+          text: 'المنصة ممتازة جداً وريحتنا في ربط محادثات الواتساب! متى تطلقون تطبيق الموبايل؟',
+          sentiment: 'positive',
+          isConverted: false
+        },
+        {
+          id: 'cm_2',
+          author: 'مشاعل الحربي',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+          platform: 'facebook',
+          text: 'حاولت التسجيل بالباقة وخصم المبلغ ولم يفتح الحساب! أرجو التواصل معي فوراً.',
+          sentiment: 'negative',
+          isConverted: false
+        }
+      ],
+      pendingApprovals: [
+        {
+          id: 'appr_1',
+          author: 'نور الصباح (Social Media Manager)',
+          content: 'كيف تضاعف مبيعات متجرك الإلكتروني عبر واتساب للأعمال في 3 خطوات بسيطة؟ 🚀 شاركونا تجاربكم بالتعليقات!',
+          platforms: ['Instagram', 'Facebook'],
+          scheduledFor: '2026-10-25 10:00 AM'
+        }
+      ]
+    };
+
+    // --- Role Switching Logic ---
+    function switchRole(newRole) {
+      state.currentRole = newRole;
+      if (newRole === 'agent') {
+        state.currentUserId = 'agent_ahmed';
+        state.currentUserName = 'أحمد زكي (Ahmed Zaki)';
+      } else if (newRole === 'supervisor') {
+        state.currentUserId = 'sup_layla';
+        state.currentUserName = 'ليلى حسن (Layla Hassan)';
+      } else if (newRole === 'social_manager') {
+        state.currentUserId = 'smm_nour';
+        state.currentUserName = 'نور الصباح (Nour Al-Sabah)';
+      } else {
+        state.currentUserId = 'admin_khalid';
+        state.currentUserName = 'خالد المنصور (Khalid Al-Mansoor)';
+      }
+
+      // Studio Action buttons check
+      const btnAppr = document.getElementById('btn-studio-approval');
+      const btnPub = document.getElementById('btn-studio-publish');
+      const roleInd = document.getElementById('studio-role-indicator');
+
+      if (['supervisor', 'admin'].includes(newRole)) {
+        btnAppr.classList.add('hidden');
+        btnPub.classList.remove('hidden');
+        roleInd.innerHTML = `الصلاحية الحالية: <strong class="text-emerald-500">${newRole.toUpperCase()} (نشر واعتماد فوري)</strong>`;
+      } else {
+        btnAppr.classList.remove('hidden');
+        btnPub.classList.add('hidden');
+        roleInd.innerHTML = `الصلاحية الحالية: <strong class="text-indigo-400">${newRole.toUpperCase()} (تقديم للمراجعة)</strong>`;
+      }
+
+      renderAll();
+    }
+
+    // --- Navigation Tabs ---
+    function setActiveTab(tabId) {
+      state.activeTab = tabId;
+      const tabs = ['inbox', 'studio', 'calendar', 'moderation', 'approvals', 'automation', 'supervisor'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-' + t);
+        const sec = document.getElementById('section-' + t);
+        if (t === tabId) {
+          btn.className = 'py-3 px-2 border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 flex items-center gap-2 whitespace-nowrap transition-all font-bold';
+          sec.classList.remove('hidden');
+          sec.classList.add('flex');
+        } else {
+          btn.className = 'py-3 px-2 border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white flex items-center gap-2 whitespace-nowrap transition-all';
+          sec.classList.add('hidden');
+          sec.classList.remove('flex');
+        }
+      });
+    }
+
+    // --- Render Conversations List ---
+    function renderConversationList() {
+      const container = document.getElementById('conversation-list-container');
+      const filtered = state.conversations.filter(c => state.filterPlatform === 'all' || c.platform === state.filterPlatform);
+      
+      document.getElementById('conv-count-badge').innerText = filtered.length;
+
+      container.innerHTML = filtered.map(c => {
+        const isSelected = c.id === state.selectedConversationId;
+        const isLocked = !!c.lockedBy;
+        const isLockedByMe = c.lockedBy?.id === state.currentUserId;
+
+        const badgeClass = c.platform === 'whatsapp' ? 'bg-emerald-500/15 text-emerald-600' : c.platform === 'instagram' ? 'bg-pink-500/15 text-pink-600' : 'bg-blue-500/15 text-blue-600';
+        const badgeIcon = c.platform === 'whatsapp' ? '💬' : c.platform === 'instagram' ? '📸' : '👤';
+
+        return `
+          <div onclick="selectConversation('${c.id}')" class="p-3.5 cursor-pointer transition-colors relative hover:bg-neutral-50 dark:hover:bg-neutral-800/40 ${isSelected ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-r-4 border-indigo-600' : ''}">
+            <div class="flex items-start gap-3">
+              <div class="relative flex-shrink-0">
+                <img src="${c.avatar}" class="w-10 h-10 rounded-full object-cover border border-neutral-200 dark:border-neutral-700" />
+                <span class="absolute -bottom-1 -right-1 text-xs">${badgeIcon}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-bold text-sm text-neutral-900 dark:text-white truncate">${c.customerName}</span>
+                  <span class="text-[10px] text-neutral-400">10:42 ص</span>
+                </div>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate mb-2">${c.lastMessage}</p>
+                <div class="flex items-center justify-between text-[10px]">
+                  <span class="px-1.5 py-0.5 rounded font-bold ${badgeClass}">${c.platform.toUpperCase()}</span>
+                  ${isLocked ? `
+                    <span class="px-1.5 py-0.5 rounded font-bold ${isLockedByMe ? 'bg-emerald-500/15 text-emerald-600' : 'bg-amber-500/15 text-amber-600 animate-pulse'}">
+                      🔒 ${isLockedByMe ? 'أنت' : c.lockedBy.name.split(' ')[0]}
+                    </span>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- Select Conversation & Lock Management ---
+    function selectConversation(id) {
+      state.selectedConversationId = id;
+      const conv = state.conversations.find(c => c.id === id);
+
+      // If unlocked, acquire lock for current agent
+      if (conv && !conv.lockedBy) {
+        conv.lockedBy = { id: state.currentUserId, name: state.currentUserName, expiresSeconds: 120 };
+      }
+
+      renderAll();
+    }
+
+    // --- Render Active Chat & Collision Lockout ---
+    function renderActiveChat() {
+      const conv = state.conversations.find(c => c.id === state.selectedConversationId) || state.conversations[0];
+      if (!conv) return;
+
+      // Header
+      const header = document.getElementById('chat-header');
+      header.innerHTML = `
+        <div class="flex items-center gap-3">
+          <img src="${conv.avatar}" class="w-10 h-10 rounded-full object-cover border border-neutral-200 dark:border-neutral-700" />
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-sm text-neutral-900 dark:text-white">${conv.customerName}</h3>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 font-mono">${conv.phone}</span>
+            </div>
+            <p class="text-xs text-neutral-400">القناة: ${conv.platform.toUpperCase()} Business Official</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="font-bold px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
+            المسؤول: ${conv.assignedAgent}
+          </span>
+        </div>
+      `;
+
+      // Collision Banner & Input Lockout Check
+      const banner = document.getElementById('collision-banner');
+      const input = document.getElementById('chat-input');
+      const btnSend = document.getElementById('btn-send-message');
+      const btnAi = document.getElementById('btn-ai-assist');
+
+      const isLockedByOther = conv.lockedBy && conv.lockedBy.id !== state.currentUserId;
+      const isLockedByMe = conv.lockedBy && conv.lockedBy.id === state.currentUserId;
+      const canOverride = ['supervisor', 'admin'].includes(state.currentRole);
+
+      if (isLockedByOther) {
+        banner.className = 'bg-amber-500/15 border-b border-amber-500/30 px-6 py-2.5 flex items-center justify-between text-amber-800 dark:text-amber-200 text-xs';
+        banner.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-base animate-pulse">🔒</span>
+            <span><strong>قفل منع التضارب نشط:</strong> هذه المحادثة يديرها حالياً <strong class="underline">${conv.lockedBy.name}</strong>. تم تعطيل حقل الرد لمنع إرسال إجابات مزدوجة للعميل.</span>
+          </div>
+          ${canOverride ? `
+            <button onclick="overrideCollisionLock('${conv.id}')" class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-md font-bold text-xs shadow-xs transition-colors">
+              كسر القفل واستلام المحادثة (Supervisor Override)
+            </button>
+          ` : ''}
+        `;
+        banner.classList.remove('hidden');
+
+        // Disable Composer
+        input.disabled = true;
+        input.placeholder = `🔒 حقل الرد معطل نظراً لتعامل موظف آخر (${conv.lockedBy.name}) مع المحادثة لمنع التضارب...`;
+        btnSend.disabled = true;
+        btnSend.classList.add('opacity-40', 'cursor-not-allowed');
+        btnAi.classList.add('hidden');
+      } else {
+        if (isLockedByMe) {
+          banner.className = 'bg-emerald-500/10 border-b border-emerald-500/20 px-6 py-1.5 flex items-center justify-between text-emerald-800 dark:text-emerald-300 text-xs';
+          banner.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span>🟢</span>
+              <span>أنت تدير هذه المحادثة الآن بنجاح — القفل التلقائي نشط لحمايتك من تضارب الزملاء.</span>
+            </div>
+            <span class="font-mono text-emerald-600 text-[11px]">متبقي: 90 ثانية</span>
+          `;
+          banner.classList.remove('hidden');
+        } else {
+          banner.classList.add('hidden');
+        }
+
+        // Enable Composer
+        input.disabled = false;
+        input.placeholder = state.composerModeNote ? 'اكتب ملاحظة لفريق العمل هنا (لن يراها العميل)...' : 'اكتب ردك للعميل هنا... (Enter للإرسال)';
+        btnSend.disabled = false;
+        btnSend.classList.remove('opacity-40', 'cursor-not-allowed');
+        btnAi.classList.remove('hidden');
+      }
+
+      // Render Messages
+      const msgContainer = document.getElementById('messages-container');
+      msgContainer.innerHTML = conv.messages.map(m => {
+        if (m.from === 'note') {
+          return `
+            <div class="mx-auto max-w-xl my-2">
+              <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl p-3 text-xs text-amber-900 dark:text-amber-200 shadow-xs">
+                <div class="flex items-center justify-between mb-1 text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                  <span>📌 ملاحظة داخلية (فريق العمل فقط)</span>
+                  <span>10:45 ص</span>
+                </div>
+                <p>${m.text}</p>
+              </div>
+            </div>
+          `;
+        }
+
+        const isCustomer = m.from === 'customer';
+        return `
+          <div class="flex flex-col ${isCustomer ? 'items-start' : 'items-end'}">
+            <div class="max-w-md rounded-2xl p-3.5 text-xs ${isCustomer ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 rounded-tr-none border border-neutral-200/80 dark:border-neutral-700' : 'bg-indigo-600 text-white rounded-tl-none'} shadow-xs">
+              <p class="leading-relaxed">${m.text}</p>
+              <div class="flex items-center justify-end gap-1 text-[10px] mt-1.5 ${isCustomer ? 'text-neutral-400' : 'text-indigo-200'}">
+                <span>10:42 ص</span>
+                ${!isCustomer ? '<span>✓✓</span>' : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Render Customer Sidebar
+      const sidebar = document.getElementById('customer-sidebar');
+      sidebar.innerHTML = `
+        <div class="text-center space-y-2">
+          <img src="${conv.avatar}" class="w-16 h-16 rounded-full object-cover mx-auto border-2 border-indigo-500/30" />
+          <h4 class="font-bold text-base text-neutral-900 dark:text-white">${conv.customerName}</h4>
+          <p class="text-xs text-neutral-400 font-mono">${conv.phone}</p>
+          <span class="inline-block px-2.5 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+            ${conv.platform.toUpperCase()}
+          </span>
+        </div>
+        <hr class="border-neutral-200 dark:border-neutral-800" />
+        <div class="space-y-2 text-xs">
+          <div class="flex justify-between py-1 border-b border-neutral-100 dark:border-neutral-800/60">
+            <span class="text-neutral-500">حالة التذكرة:</span>
+            <span class="font-bold text-emerald-600 uppercase">${conv.status}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-neutral-100 dark:border-neutral-800/60">
+            <span class="text-neutral-500">الأولوية:</span>
+            <span class="font-bold ${conv.priority === 'urgent' ? 'text-rose-500' : 'text-neutral-700 dark:text-neutral-300'}">${conv.priority === 'urgent' ? '🚨 عاجل جداً' : 'متوسطة'}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-neutral-100 dark:border-neutral-800/60">
+            <span class="text-neutral-500">تحليل المشاعر (AI):</span>
+            <span class="font-bold">${conv.sentiment === 'negative' ? '😡 شكوى' : '😊 إيجابي'}</span>
+          </div>
+        </div>
+        <div class="space-y-1.5">
+          <div class="text-xs font-bold text-neutral-400 uppercase">الوسوم (Tags):</div>
+          <div class="flex flex-wrap gap-1">
+            ${conv.tags.map(t => `<span class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[11px] font-medium border border-indigo-200 dark:border-indigo-800">#${t}</span>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // --- Override Collision Lock ---
+    function overrideCollisionLock(convId) {
+      const conv = state.conversations.find(c => c.id === convId);
+      if (conv) {
+        conv.lockedBy = { id: state.currentUserId, name: state.currentUserName, expiresSeconds: 120 };
+        alert(`تم كسر القفل بنجاح ونقل إدارة المحادثة إلى: ${state.currentUserName}`);
+        renderAll();
+      }
+    }
+
+    // --- Message Sending ---
+    function handleSendMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const conv = state.conversations.find(c => c.id === state.selectedConversationId);
+      if (conv) {
+        conv.messages.push({
+          id: 'm_' + Date.now(),
+          from: state.composerModeNote ? 'note' : 'agent',
+          text
+        });
+        if (!state.composerModeNote) {
+          conv.lastMessage = text;
+        }
+        input.value = '';
+        renderActiveChat();
+        renderConversationList();
+      }
+    }
+
+    function setComposerMode(isNote) {
+      state.composerModeNote = isNote;
+      const btnReply = document.getElementById('btn-mode-reply');
+      const btnNote = document.getElementById('btn-mode-note');
+      const input = document.getElementById('chat-input');
+
+      if (isNote) {
+        btnNote.className = 'px-3 py-1 rounded-md font-bold bg-amber-500 text-white shadow-xs';
+        btnReply.className = 'px-3 py-1 rounded-md font-bold text-neutral-500 hover:text-neutral-900';
+        input.placeholder = 'اكتب ملاحظة لفريق العمل هنا (لن يراها العميل)...';
+      } else {
+        btnReply.className = 'px-3 py-1 rounded-md font-bold bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-xs';
+        btnNote.className = 'px-3 py-1 rounded-md font-bold text-neutral-500 hover:text-neutral-900';
+        input.placeholder = 'اكتب ردك للعميل هنا... (Enter للإرسال)';
+      }
+    }
+
+    function triggerSmartAiReply() {
+      const conv = state.conversations.find(c => c.id === state.selectedConversationId);
+      const input = document.getElementById('chat-input');
+      input.value = `أهلاً بك أستاذ ${conv.customerName}، يسعدنا تواصلك مع EHY Connect! تم تسجيل استفسارك وسيقوم فريقنا بتقديم الدعم اللازم خلال دقائق.`;
+    }
+
+    function insertCannedReply(text) {
+      document.getElementById('chat-input').value = text;
+    }
+
+    // --- Simulate Inbound WhatsApp Webhook ---
+    function simulateIncomingWhatsApp() {
+      const newId = 'conv_' + Date.now();
+      const newConv = {
+        id: newId,
+        customerName: 'فهد الدوسري (عميل جديد)',
+        phone: '+966509988776',
+        platform: 'whatsapp',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+        status: 'open',
+        priority: 'high',
+        sentiment: 'positive',
+        assignedAgent: 'غير مسند (Unassigned)',
+        tags: ['واتساب_جديد', 'استفسار'],
+        lastMessage: 'مرحباً، أريد تجربة المنصة وتفعيل ربط رقم واتساب تجريبي.',
+        lockedBy: null,
+        messages: [
+          { id: 'm_new_1', from: 'customer', text: 'مرحباً، أريد تجربة المنصة وتفعيل ربط رقم واتساب تجريبي.' }
+        ]
+      };
+
+      state.conversations.unshift(newConv);
+      state.selectedConversationId = newId;
+      setActiveTab('inbox');
+      renderAll();
+      alert('🔔 Webhook Event Received!\nتم استقبال حدث رسالة واتساب جديدة من الرقم (+966509988776) وإدراج التذكرة فوراً في صندوق الوارد عبر Supabase Realtime!');
+    }
+
+    // --- Render Comments Moderation ---
+    function renderComments() {
+      const container = document.getElementById('comments-container');
+      container.innerHTML = state.comments.map(c => `
+        <div class="p-4 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-3 shadow-xs">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-neutral-100 dark:border-neutral-800">
+            <span class="font-bold text-neutral-500 uppercase">${c.platform}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.sentiment === 'negative' ? 'bg-rose-500/15 text-rose-600' : 'bg-emerald-500/15 text-emerald-600'}">
+              ${c.sentiment === 'negative' ? '🚨 شكوى سلبية' : '😊 تعليق إيجابي'}
+            </span>
+          </div>
+          <div class="flex items-start gap-3">
+            <img src="${c.avatar}" class="w-10 h-10 rounded-full object-cover" />
+            <div class="flex-1 text-xs">
+              <span class="font-bold text-sm block mb-1">${c.author}</span>
+              <p class="text-neutral-700 dark:text-neutral-300 leading-relaxed">${c.text}</p>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-neutral-100 dark:border-neutral-800 flex justify-between items-center text-xs">
+            <button onclick="convertCommentToTicket('${c.id}')" class="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition-colors">
+              ${c.isConverted ? '✓ تم التحويل لتذكرة' : '📥 تحويل لتذكرة دعم في الـ Inbox'}
+            </button>
+            <span class="text-neutral-400 text-[11px]">منذ 15 دقيقة</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function convertCommentToTicket(commentId) {
+      const cm = state.comments.find(c => c.id === commentId);
+      if (cm) {
+        cm.isConverted = true;
+        state.conversations.unshift({
+          id: 'conv_cm_' + Date.now(),
+          customerName: cm.author,
+          phone: `تعليق ${cm.platform.toUpperCase()}`,
+          platform: cm.platform,
+          avatar: cm.avatar,
+          status: 'open',
+          priority: cm.sentiment === 'negative' ? 'urgent' : 'medium',
+          sentiment: cm.sentiment,
+          assignedAgent: 'غير مسند',
+          tags: ['سوشيال_ميديا', 'تعليق'],
+          lastMessage: cm.text,
+          lockedBy: null,
+          messages: [{ id: 'm_c1', from: 'customer', text: cm.text }]
+        });
+        alert(`تم تحويل تعليق (${cm.author}) بنجاح إلى تذكرة دعم فني جديدة في صندوق الوارد!`);
+        renderAll();
+      }
+    }
+
+    // --- Render Approval Queue ---
+    function renderApprovals() {
+      const container = document.getElementById('approvals-container');
+      const badge = document.getElementById('approvals-badge');
+      badge.innerText = state.pendingApprovals.length;
+
+      if (state.pendingApprovals.length === 0) {
+        container.innerHTML = `
+          <div class="p-12 text-center bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800">
+            <span class="text-3xl">🎉</span>
+            <h4 class="font-bold text-sm mt-2">لا توجد مسودات بانتظار الاعتماد</h4>
+          </div>
+        `;
+        return;
+      }
+
+      const isSupervisor = ['supervisor', 'admin'].includes(state.currentRole);
+
+      container.innerHTML = state.pendingApprovals.map(appr => `
+        <div class="p-5 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-3 shadow-xs">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-neutral-100 dark:border-neutral-800">
+            <span class="font-bold">المؤلف: ${appr.author}</span>
+            <span class="text-neutral-400 font-mono">الجدولة: ${appr.scheduledFor}</span>
+          </div>
+          <p class="text-xs text-neutral-800 dark:text-neutral-200 leading-relaxed">${appr.content}</p>
+          <div class="pt-3 border-t border-neutral-100 dark:border-neutral-800 flex justify-between items-center text-xs">
+            <span class="text-neutral-400">المنصات: ${appr.platforms.join(', ')}</span>
+            ${isSupervisor ? `
+              <div class="flex gap-2">
+                <button onclick="approvePost('${appr.id}', false)" class="px-3 py-1.5 rounded-lg bg-neutral-200 text-neutral-700 font-bold">رفض</button>
+                <button onclick="approvePost('${appr.id}', true)" class="px-4 py-1.5 rounded-lg bg-emerald-600 text-white font-bold shadow-xs">✓ اعتماد وجدولة</button>
+              </div>
+            ` : `
+              <span class="italic text-neutral-400">⏳ بانتظار قرار المشرف</span>
+            `}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function approvePost(id, isApproved) {
+      state.pendingApprovals = state.pendingApprovals.filter(a => a.id !== id);
+      alert(isApproved ? '✓ تم اعتماد المنشور بنجاح وإدراجه في تقويم المحتوى!' : 'تم رفض المنشور.');
+      renderApprovals();
+    }
+
+    function submitStudioPost(type) {
+      const text = document.getElementById('studio-content').value;
+      if (type === 'approval') {
+        state.pendingApprovals.push({
+          id: 'appr_' + Date.now(),
+          author: state.currentUserName,
+          content: text,
+          platforms: ['Instagram', 'Facebook', 'TikTok'],
+          scheduledFor: document.getElementById('studio-schedule-date').value
+        });
+        alert('تم تقديم مسودة المنشور بنجاح لطابور الموافقات!');
+        setActiveTab('approvals');
+      } else {
+        alert('تم النشر الفوري بنجاح عبر واجهات Zernio API الرسمية!');
+        setActiveTab('calendar');
+      }
+    }
+
+    function updateStudioPreview() {
+      const text = document.getElementById('studio-content').value;
+      const url = document.getElementById('studio-media-url').value;
+      document.getElementById('preview-text').innerText = text || 'معاينة نص المنشور...';
+      document.getElementById('preview-img').src = url;
+      document.getElementById('studio-char-count').innerText = `${text.length} / 2200 حرف`;
+    }
+
+    function toggleStudioPlatform(plat) {
+      const btn = document.getElementById('btn-plat-' + plat);
+      btn.classList.toggle('bg-neutral-900');
+      btn.classList.toggle('text-white');
+    }
+
+    // --- Simulator & Language ---
+    function runSimulation() {
+      const text = document.getElementById('sim-input').value;
+      const output = document.getElementById('sim-output');
+      output.classList.remove('hidden');
+      alert('تم تحليل الرسالة وفحص النوايا وتفعيل قاعدة الأتمتة المعتمدة بنجاح!');
+    }
+
+    function toggleLanguage() {
+      state.language = state.language === 'ar' ? 'en' : 'ar';
+      document.documentElement.dir = state.language === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = state.language;
+      document.getElementById('btn-lang').innerText = state.language === 'ar' ? 'English 🌐' : 'العربية 🌐';
+      
+      document.querySelectorAll('.tab-title').forEach(el => {
+        el.innerText = el.getAttribute('data-' + state.language);
+      });
+      document.querySelectorAll('.lang-txt').forEach(el => {
+        el.innerText = el.getAttribute('data-' + state.language);
+      });
+    }
+
+    function filterConversations(p) {
+      state.filterPlatform = p;
+      document.querySelectorAll('.conv-filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-filter') === p) {
+          btn.className = 'px-2.5 py-1 rounded-md font-bold bg-indigo-600 text-white whitespace-nowrap conv-filter-btn';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 whitespace-nowrap conv-filter-btn';
+        }
+      });
+      renderConversationList();
+    }
+
+    // --- Master Render Coordinator ---
+    function renderAll() {
+      renderConversationList();
+      renderActiveChat();
+      renderComments();
+      renderApprovals();
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+    });
+  </script>
+</body>
+</html>
